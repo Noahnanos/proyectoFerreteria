@@ -15,6 +15,33 @@ async function getProducts(req, res = response) {
     }
 }
 
+async function addProduct(req, res = response){
+    //desestructuracion del body
+    const { name, price, quantity } = req.body;
+
+    //Se construye la consulta
+    const values = [name.toUpperCase(), price, quantity];
+    const query = {
+        text : "INSERT INTO product (name, price, quantity) VALUES ($1, $2, $3)",
+        values
+    };
+
+    try {
+        //Se genera la consulta
+        const result = await pool.query(query);
+
+        //Se envia el resultado de la consulta
+        res.status(201).json({
+            ok: true,
+            resp: result.command
+        });
+    } catch (error) {
+        res.status(500).json({
+            error
+        });
+    }
+}
+
 async function editProduct(req, res = response){
     //desestructuracion del body
     const { code, name, price, quantity } = req.body;
@@ -27,7 +54,7 @@ async function editProduct(req, res = response){
     };
 
     try {
-        //Se genera la consulta
+        //Se hace la consulta
         const result = await pool.query(query);
 
         //Se envia el resultado de la consulta
@@ -46,7 +73,9 @@ async function deleteProduct(req, res = response) {
 
     try {
         const code = req.query.code;
+        //Se hace la consulta
         const result = await pool.query(`DELETE FROM product WHERE code = ${code}`);
+
         res.status(200).json({
             ok: true,
             resp: result.rows
@@ -61,5 +90,6 @@ async function deleteProduct(req, res = response) {
 module.exports = {
     getProducts,
     editProduct,
-    deleteProduct
+    deleteProduct,
+    addProduct
 }
