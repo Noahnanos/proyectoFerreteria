@@ -8,7 +8,7 @@ async function signIn(req, res = response) {
     //Se construye la consulta
     const values = [email, pass];
     const query = {
-        text: 'SELECT * FROM account WHERE email = $1 AND pass = $2',
+        text: 'SELECT email FROM account WHERE email = $1 AND pass = $2',
         values
     };
     

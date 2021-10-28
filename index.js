@@ -6,9 +6,9 @@ const app = express();
 // Lectura y parse del Body de una peticion http
 app.use(express.json());
 
-//se ocupa la ruta especificada
-app.use('/product', require('./routes/product'));
-app.use('/signIn', require('./routes/user'));
+//establecemos las rutas a utilizar
+app.use('/products', require('./routes/products'));
+app.use('/signIn', require('./routes/users'));
  
 //se inicia el servidor para escuchar conecciones
 app.listen(3000, () => {

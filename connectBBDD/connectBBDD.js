@@ -1,3 +1,4 @@
+//Pool para permitir la conexion de multiples clientes
 const { Pool } = require('pg');
 
 //Configuracion de la conexion a la base de datos
