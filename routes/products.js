@@ -1,6 +1,6 @@
 const { Router } = require('express');
 
-const { getProducts, editProduct,  deleteProduct, addProduct} = require('../controllers/product.controller');
+const { getProducts, editProduct,  deleteProduct, addProduct} = require('../services/product.services');
 const {validateFields} = require('../middlewares/validateForm');
 
 const router = Router();

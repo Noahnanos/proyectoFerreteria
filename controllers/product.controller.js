@@ -1,93 +1,82 @@
-const { response } = require('express');
+const { pool } = require('../connectBBDD/connectBBDD');
 
-const {addProductDB, getProductsDB, editProductDB, deleteProductDB, verifyProduct} = require('../services/product.services');
-
-
-async function getProducts(req, res = response) {
-    //se llama a función que se comunica con la db
-    const products = await getProductsDB();
-
-    //Se válida el resultado
-    if (products) {
-        res.status(200).json({
-            ok: true,
-            products
-        });
-    }else{
-        res.status(500).json({
-            ok: products
-        });
+//Se obtiene la lista de productos de la base de datos
+async function getProductsDB() {
+    try {
+        //se hace la consulta
+        const result = await pool.query('SELECT code, name, price, quantity FROM product;');
+        return result.rows;
+    } catch (error) {
+        return false;
     }
 }
 
-//
-async function addProduct(req, res = response){
-    //desestructuracion del body
-    const {name, price, quantity} = req.body;
-    
-    const verifyProd = await verifyProduct(name.toUpperCase());
+//Para añadir un producto a DB
+async function addProductDB({name, price, quantity}) {
+    //Se construye la consulta
+    const values = [name.toUpperCase(), price, quantity];
+    const query = {
+        text : "INSERT INTO product (name, price, quantity) VALUES ($1, $2, $3)",
+        values
+    };
 
-    if (verifyProd.length > 0) {
-        return res.status(400).json({
-            ok: false,
-            message: "El producto ya se encuentra registrado."
-        });
-    }
-
-    const query = await addProductDB({name, price,quantity});
-    if (query) {
-        res.status(201).json({
-            ok: query,
-            message: 'El producto se agrego correctamente.'
-        });
-    } else {
-        res.status(500).json({
-            ok: query,
-            message: "Error interno del servidor."
-        });
-    }
-    
-}
-
-async function editProduct(req, res = response){
-
-    //desestructuracion del body
-    const { code, name, price, quantity } = req.body;
-    
-    const result = await editProductDB({code, name, price, quantity });
-
-    if (result) {
-        res.status(200).json({
-            ok: true,
-            resp: result
-        });
-    }else{
-        res.status(500).json({
-            ok: false
-        });
+    try {
+        //Se genera la consulta
+        await pool.query(query);
+        
+        //Se envia el resultado de la consulta
+        return true;
+    } catch (error) {
+        return false;
     }
 }
 
-async function deleteProduct(req, res = response) {
-    const code = req.query.code;
-    console.log(code);
-    const result = await deleteProductDB(code);
-    
-    if (result.length == 0) {
-        res.status(200).json({
-            ok: true,
-            resp: result
-        });
-    }else{
-        res.status(500).json({
-            ok: false
-        });
+//Para editar un producto de la DB
+async function editProductDB(product){
+
+    //Se construye la consulta
+    const values = [product.name, product.price, product.quantity, product.code];
+    const query = {
+        text: "UPDATE product SET name = $1, price = $2, quantity = $3 WHERE code = $4 RETURNING *",
+        values
+    };
+
+    try {
+        //Se hace la consulta
+        const result = await pool.query(query);
+        return result.rows;
+    } catch (error) {
+        return false;
+    }
+
+}
+
+//eliminar un producto de la db
+async function deleteProductDB(code) {
+    try {
+        //Se hace la consulta
+        const result = await pool.query(`DELETE FROM product WHERE code = ${code}`);
+        return result.rows;
+    } catch (error) {
+        return false;
+    }
+}
+
+//verificar si existe un producto
+async function verifyProduct(name) {
+    try {
+        //se hace la consulta
+        const result = await pool.query(`SELECT code FROM product WHERE name = '${name}';`);
+        return result.rows;
+    } catch (error) {
+        return false;
     }
 }
 
 module.exports = {
-    getProducts,
-    editProduct,
-    deleteProduct,
-    addProduct
+    addProductDB,
+    getProductsDB,
+    editProductDB,
+    verifyProduct,
+    deleteProductDB
 }

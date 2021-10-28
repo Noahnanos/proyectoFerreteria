@@ -1,81 +1,101 @@
-const { pool } = require('../connectBBDD/connectBBDD');
+const { response } = require('express');
 
-//Se obtiene la lista de productos de la base de datos
-async function getProductsDB() {
-    try {
-        //se hace la consulta
-        const result = await pool.query('SELECT code, name, price, quantity FROM product;');
-        return result.rows;
-    } catch (error) {
-        return false;
+const {addProductDB, getProductsDB, editProductDB, deleteProductDB, verifyProduct} = require('../controllers/product.controller');
+
+//obtener la lista de productos
+async function getProducts(req, res = response) {
+    //se llama a función que se comunica con la db
+    const products = await getProductsDB();
+
+    //Se válida el resultado
+    if (products) {
+        res.status(200).json({
+            ok: true,
+            products
+        });
+    }else{
+        res.status(500).json({
+            ok: products
+        });
     }
 }
 
-//Para añadir un producto a DB
-async function addProductDB({name, price, quantity}) {
-    //Se construye la consulta
-    const values = [name.toUpperCase(), price, quantity];
-    const query = {
-        text : "INSERT INTO product (name, price, quantity) VALUES ($1, $2, $3)",
-        values
-    };
+//agregar un producto
+async function addProduct(req, res = response){
+    //desestructuracion del body
+    const {name, price, quantity} = req.body;
+    
+    //Para verificar si el producto ya existe
+    const verifyProd = await verifyProduct(name.toUpperCase());
 
-    try {
-        //Se genera la consulta
-        await pool.query(query);
-        
-        //Se envia el resultado de la consulta
-        return true;
-    } catch (error) {
-        return false;
+    if (verifyProd.length > 0) {
+        return res.status(400).json({
+            ok: false,
+            message: "El producto ya se encuentra registrado."
+        });
+    }
+
+    //se genera la comunicacion con la base de datos
+    const query = await addProductDB({name, price,quantity});
+
+    //se evalua el resultado
+    if (query) {
+        res.status(201).json({
+            ok: query,
+            message: 'El producto se agrego correctamente.'
+        });
+    } else {
+        res.status(500).json({
+            ok: query,
+            message: "Error interno del servidor."
+        });
+    }
+    
+}
+
+//para editar un producto
+async function editProduct(req, res = response){
+
+    //desestructuracion del body
+    const { code, name, price, quantity } = req.body;
+    
+    const result = await editProductDB({code, name, price, quantity });
+
+    //se evalua el resultado
+    if (result) {
+        res.status(200).json({
+            ok: true,
+            resp: result
+        });
+    }else{
+        res.status(500).json({
+            ok: false
+        });
     }
 }
 
-//Para editar un producto de la DB
-async function editProductDB(product){
-
-    //Se construye la consulta
-    const values = [product.name, product.price, product.quantity, product.code];
-    const query = {
-        text: "UPDATE product SET name = $1, price = $2, quantity = $3 WHERE code = $4 RETURNING *",
-        values
-    };
-
-    try {
-        //Se hace la consulta
-        const result = await pool.query(query);
-        return result.rows;
-    } catch (error) {
-        return false;
-    }
-
-}
-
-async function deleteProductDB(code) {
-    try {
-        //Se hace la consulta
-        const result = await pool.query(`DELETE FROM product WHERE code = ${code}`);
-        return result.rows;
-    } catch (error) {
-        return false;
-    }
-}
-
-
-async function verifyProduct(name) {
-    try {
-        //se hace la consulta
-        const result = await pool.query(`SELECT code FROM product WHERE name = '${name}';`);
-        return result.rows;
-    } catch (error) {
-        return false;
+async function deleteProduct(req, res = response) {
+    const code = req.query.code;
+    
+    //se llama al services
+    const result = await deleteProductDB(code);
+    
+    //se evalua el resultado
+    if (result == false) {
+        res.status(200).json({
+            ok: true,
+            resp: result
+        });
+    }else{
+        res.status(500).json({
+            ok: false
+        });
     }
 }
 
 module.exports = {
-    addProductDB,
-    getProductsDB,
-    editProductDB,
-    verifyProduct,
-    deleteProductDB
+    getProducts,
+    editProduct,
+    deleteProduct,
+    addProduct
 }
