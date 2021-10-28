@@ -1,6 +1,5 @@
 const { pool } = require('../connectBBDD/connectBBDD');
 
-
 //Se obtiene la lista de productos de la base de datos
 async function getProductsDB() {
     try {
@@ -10,7 +9,6 @@ async function getProductsDB() {
     } catch (error) {
         return false;
     }
-
 }
 
 //Para añadir un producto a DB
@@ -34,13 +32,10 @@ async function addProductDB({name, price, quantity}) {
 }
 
 //Para editar un producto de la DB
-async function editProductDB(req, res = response){
-
-    //desestructuracion del body
-    const { code, name, price, quantity } = req.body;
+async function editProductDB(product){
 
     //Se construye la consulta
-    const values = [name, price, quantity, code];
+    const values = [product.name, product.price, product.quantity, product.code];
     const query = {
         text: "UPDATE product SET name = $1, price = $2, quantity = $3 WHERE code = $4 RETURNING *",
         values
@@ -54,6 +49,16 @@ async function editProductDB(req, res = response){
         return false;
     }
 
+}
+
+async function deleteProductDB(code) {
+    try {
+        //Se hace la consulta
+        const result = await pool.query(`DELETE FROM product WHERE code = ${code}`);
+        return result.rows;
+    } catch (error) {
+        return false;
+    }
 }
 
 
@@ -71,5 +76,6 @@ module.exports = {
     addProductDB,
     getProductsDB,
     editProductDB,
-    verifyProduct
+    verifyProduct,
+    deleteProductDB
 }

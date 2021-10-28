@@ -1,8 +1,6 @@
 const { response } = require('express');
 
-const { pool } = require('../connectBBDD/connectBBDD');
-const {addProductDB, getProductsDB, editProductDB, verifyProduct} = require('../services/product-service');
-const product = require('../models/product');
+const {addProductDB, getProductsDB, editProductDB, deleteProductDB, verifyProduct} = require('../services/product.services');
 
 
 async function getProducts(req, res = response) {
@@ -28,7 +26,7 @@ async function addProduct(req, res = response){
     const {name, price, quantity} = req.body;
     
     const verifyProd = await verifyProduct(name.toUpperCase());
-    console.log(verifyProd)
+
     if (verifyProd.length > 0) {
         return res.status(400).json({
             ok: false,
@@ -52,13 +50,16 @@ async function addProduct(req, res = response){
 }
 
 async function editProduct(req, res = response){
+
+    //desestructuracion del body
+    const { code, name, price, quantity } = req.body;
     
-    const result = await editProductDB();
+    const result = await editProductDB({code, name, price, quantity });
 
     if (result) {
         res.status(200).json({
             ok: true,
-            resp: result.rows
+            resp: result
         });
     }else{
         res.status(500).json({
@@ -68,17 +69,16 @@ async function editProduct(req, res = response){
 }
 
 async function deleteProduct(req, res = response) {
-
-    try {
-        const code = req.query.code;
-        //Se hace la consulta
-        const result = await pool.query(`DELETE FROM product WHERE code = ${code}`);
-
+    const code = req.query.code;
+    console.log(code);
+    const result = await deleteProductDB(code);
+    
+    if (result.length == 0) {
         res.status(200).json({
             ok: true,
-            resp: result.rows
+            resp: result
         });
-    } catch (error) {
+    }else{
         res.status(500).json({
             ok: false
         });

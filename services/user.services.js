@@ -1,9 +1,7 @@
 const { response } = require('express');
 const { pool } = require('../connectBBDD/connectBBDD');
 
-async function signIn(req, res = response) {
-    //desestructuracion del body
-    const { email, pass } = req.body;
+async function userDB(email, pass) {
 
     //Se construye la consulta
     const values = [email, pass];
@@ -18,19 +16,13 @@ async function signIn(req, res = response) {
 
         //se verifica si se encontró el usuario
         if (result.rows.length > 0) {
-            res.status(200).json({
-                ok: true,
-                user: result.rows
-            });
+            return true;
         }else{
-            res.status(401).json({
-                ok: false,
-                error: "Credenciales inválidas"
-            });
+            return false;
         }
         
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             error
         });
     }
@@ -39,5 +31,5 @@ async function signIn(req, res = response) {
 }   
 
 module.exports = {
-    signIn
+    userDB
 }
