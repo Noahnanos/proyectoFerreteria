@@ -36,7 +36,7 @@ async function addProduct(req, res = response){
     }
 
     //se genera la comunicacion con la base de datos
-    const query = await addProductDB({name, price,quantity});
+    const query = await addProductDB({name, price, quantity});
 
     //se evalua el resultado
     if (query) {
