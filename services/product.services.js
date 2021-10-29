@@ -53,12 +53,13 @@ async function addProduct(req, res = response){
     
 }
 
-//para editar un producto
+//para editar un producto y devolver una respuesta
 async function editProduct(req, res = response){
 
     //desestructuracion del body
     const { code, name, price, quantity } = req.body;
     
+    //
     const result = await editProductDB({code, name, price, quantity });
 
     //se evalua el resultado

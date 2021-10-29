@@ -2,7 +2,7 @@ const { response } = require('express');
 
 const { userDB } = require('../controllers/user.controller');
 
-
+//funcion que permite el inicio
 async function signIn(req, res = response) {
     //desestructuracion del body
     const { email, pass } = req.body;

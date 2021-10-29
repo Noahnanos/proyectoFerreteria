@@ -4,6 +4,7 @@ const cors = require('cors');
 //Inicializamos express
 const app = express();
 
+//para permitir conexiones de diferentes origenes
 app.use(cors());
 
 // Lectura y parse del Body de una peticion http
