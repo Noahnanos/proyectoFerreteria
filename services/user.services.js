@@ -8,7 +8,7 @@ async function signIn(req, res = response) {
     const { email, pass } = req.body;
 
     const result = await userDB(email, pass);
-    
+
     //se verifica si se encontró el usuario
     if (result) {
         res.status(200).json({

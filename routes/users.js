@@ -5,6 +5,6 @@ const {signIn} = require('../services/user.services');
 const router = Router();
 
 //Metodos para solicitudes HTTP asociados al inicio de sesion
-router.get('/', signIn);
+router.post('/', signIn);
 
 module.exports = router;

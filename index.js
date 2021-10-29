@@ -1,7 +1,10 @@
 const express = require('express');
+const cors = require('cors');
 
 //Inicializamos express
 const app = express();
+
+app.use(cors());
 
 // Lectura y parse del Body de una peticion http
 app.use(express.json());
