@@ -4,7 +4,7 @@ const { pool } = require('../connectBBDD/connectBBDD');
 async function getProductsDB() {
     try {
         //se hace la consulta
-        const result = await pool.query('SELECT code, name, price, quantity FROM product;');
+        const result = await pool.query('SELECT code, name, price, quantity FROM product ORDER BY code;');
         return result.rows;
     } catch (error) {
         return false;
